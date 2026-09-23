@@ -25,7 +25,16 @@ def retrieve(query: str, k: int | None = None) -> list[RetrievedChunk]:
     score += PERSON_BOOST for kind='person', sort desc, return.
 
     FAISS ids with no matching Chunk row (orphans, per DATABASE.md) are
-    dropped implicitly: filter(id__in=ids) simply doesn't return them."""
+    dropped implicitly: filter(id__in=ids) simply doesn't return them.
+
+    IndexFlatIP.search() always returns up to k results -- it has no
+    relevance floor, so it happily returns the closest available vectors
+    even when nothing in the index is actually relevant to the query (e.g.
+    a query about a site that was never successfully fetched/ingested).
+    This function does not filter results by score; deciding "not found" is
+    the LLM's job in formatter.format_results(), which sees the query
+    alongside this context and is instructed to say so explicitly rather
+    than answer from irrelevant chunks."""
     k = k if k is not None else settings.SEARCH_TOP_K
 
     vector = get_embedder().embed_query(query)

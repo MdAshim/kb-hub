@@ -101,6 +101,13 @@ Response `200`:
 ```
 When the LLM fails, `llm_ok` is `false`, `answer` is null, `people` is empty, and `sources` still holds the retrieved chunks.
 
+`sources` always holds up to `top_k` chunks whenever the index is non-empty, even for a query
+about something that was never fetched/ingested (e.g. a site the harvester couldn't reach):
+FAISS's nearest-neighbor search has no relevance floor, so it returns the closest available
+vectors regardless of whether they're actually relevant. `people` and `answer` are what express
+"not found" in that case (an empty `people` list and an explicit not-found sentence), not an
+empty `sources`.
+
 ## Errors
 | Code | When | Body |
 |---|---|---|
