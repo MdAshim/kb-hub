@@ -109,6 +109,14 @@ tests/       pytest suite and HTML fixtures
   (`errors.edgesuite.net` reference ID in the response body), not a missing-JS-render issue.
   This is CDN-level bot detection/IP-reputation blocking, not something a longer Playwright wait
   or extra headers can get past — treated as out of scope for this project.
+- `https://www.oracle.com/in/corporate/executives/` fetches fine (200, plenty of text) but
+  currently yields **zero** extracted people. Diagnosed directly: the names (e.g. `<strong>Lawrence
+  J. Ellison</strong>`) are sitting in completely ordinary static HTML right next to their role
+  titles, but `trafilatura`'s content extraction drops the name elements for this specific
+  "team grid" card layout while keeping the role-title text — `clean_text` ends up as 25 job
+  titles with no names attached to any of them. This is a known extraction-precision gap in
+  this page's specific markup shape, not a bug we're hiding and not a model-quality issue
+  (confirmed: the LLM correctly reports no names when given text that has none). Not fixed here.
 - FAISS is a local file index, suited to a single-machine deployment.
 - Person extraction quality depends on the LLM; small local models (3B) are faster but less
   accurate than 8B. Results always link to their source page.

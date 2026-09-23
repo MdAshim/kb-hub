@@ -61,3 +61,28 @@ Format: context, decision, consequences.
   already created are left in SQLite (the record is marked `failed`, no partial vectors are
   saved). This is intentional, not a bug: since SQLite is the source of truth, those rows are
   picked up and indexed by a later `python manage.py rebuild_index`, or by re-harvesting the URL.
+
+## ADR-010: Opportunistic JSON-LD Person extraction
+
+- **Context:** Diagnosing why theorg.com/Perplexity's page yielded zero extracted people found
+  that `clean_text` had no leadership content at all — but the raw HTML `<head>` contained a
+  `schema.org Organization` JSON-LD block with a full `employee` array of `Person` entries
+  (name, jobTitle), which `trafilatura` correctly ignores since a `<script>` tag isn't visible
+  article text. Many sites embed this kind of structured data for SEO; where present, it's more
+  reliable than prose extraction because it's already machine-readable and doesn't depend on an
+  LLM correctly parsing free text.
+- **Decision:** Before chunking, `knowledge/structured_data.py` parses every
+  `<script type="application/ld+json">` block in `raw_html` and recursively pulls out any
+  `@type: "Person"` node at any nesting depth (top-level, a list, an `@graph`, or nested under
+  an `Organization`'s `employee`/similar, inferring company from the nearest enclosing
+  Organization's name when a Person has no explicit `worksFor`). These people are created
+  directly as `Person` rows — no LLM call needed for them, since the data is already
+  structured and trustworthy. `extract_people()` (the LLM path) still runs on `clean_text` as
+  before, and its results are merged in and deduped by lowercased name, with the JSON-LD
+  version winning on a name collision. Malformed or missing JSON-LD contributes nothing;
+  it never breaks ingest.
+- **Consequences:** Cheap (no extra LLM call) and deterministic for people found this way. It's
+  not a universal fix, though: it only helps on sites that actually embed `schema.org Person`
+  markup. Oracle's executives page, for example, doesn't embed any — its zero-people result is
+  unrelated and stays a documented `trafilatura` extraction-precision gap (see README's Known
+  limitations), not something this ADR addresses.
