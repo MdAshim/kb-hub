@@ -13,6 +13,7 @@ urlpatterns = [
     path("", TemplateView.as_view(template_name="base.html"), name="home"),
     path("", include("harvest.urls")),
     path("", include("search.urls")),
+    path("api/", include("api.urls")),
 ]
 
 if settings.DEBUG:

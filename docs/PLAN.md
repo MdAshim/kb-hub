@@ -39,11 +39,11 @@ Story IDs refer to `BACKLOG.md`.
 - [x] Search page: form, answer, person cards, collapsible sources [US-10, US-11]
 
 ## Phase 4: REST API (E4)
-- [ ] `UrlRecordSerializer` with `include_html` toggle [US-13]
-- [ ] `GET /api/urls/` with pagination and filters [US-13]
-- [ ] `GET /api/urls/{id}/` [US-14]
-- [ ] `POST /api/search/` [US-15]
-- [ ] `GET /api/jobs/{id}/` [US-16]
+- [x] `UrlRecordSerializer` with `include_html` toggle [US-13]
+- [x] `GET /api/urls/` with pagination and filters [US-13]
+- [x] `GET /api/urls/{id}/` [US-14]
+- [x] `POST /api/search/` [US-15]
+- [x] `GET /api/jobs/{id}/` [US-16]
 
 ## Phase 5: Quality and delivery (E5)
 - [ ] Complete test cases in `TESTING.md` [US-18]
