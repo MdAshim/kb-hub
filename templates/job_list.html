@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Jobs{% endblock %}
+{% block content %}
+<h1>Jobs</h1>
+<ul>
+    {% for job in jobs %}
+    <li>
+        <a href="{% url 'harvest:job_detail' job.id %}">
+            #{{ job.id }} {{ job.original_filename }} ({{ job.status }})
+        </a>
+    </li>
+    {% empty %}
+    <li>No jobs yet. <a href="{% url 'harvest:upload' %}">Upload a file</a> to start one.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -11,14 +11,14 @@ Story IDs refer to `BACKLOG.md`.
 - [x] Base template with nav (Upload, Jobs, Search) and HTMX
 
 ## Phase 1: Upload and harvest (E1)
-- [ ] `HarvestJob`, `UrlRecord` models + migrations [US-01, US-05]
-- [ ] `parsers.parse_url_file()` for CSV and XLSX, column detection, validation, dedupe [US-02]
-- [ ] Upload form and view with type/size validation [US-01]
-- [ ] `fetcher.fetch()` with requests: UA, timeout, retries; trafilatura clean text [US-03]
-- [ ] Playwright fallback on 403/429 or short text [US-04]
-- [ ] Huey task `fetch_url(record_id)`; enqueue one per URL on upload [US-03]
-- [ ] Job status page with HTMX polling [US-06]
-- [ ] Run against `samples/Leadership_URL.xlsx`; save fetched HTML as test fixtures
+- [x] `HarvestJob`, `UrlRecord` models + migrations [US-01, US-05]
+- [x] `parsers.parse_url_file()` for CSV and XLSX, column detection, validation, dedupe [US-02]
+- [x] Upload form and view with type/size validation [US-01]
+- [x] `fetcher.fetch()` with requests: UA, timeout, retries; trafilatura clean text [US-03]
+- [x] Playwright fallback on 403/429 or short text [US-04]
+- [x] Huey task `fetch_url(record_id)`; enqueue one per URL on upload [US-03]
+- [x] Job status page with HTMX polling [US-06]
+- [x] Run against `samples/Leadership_URL.xlsx`; save fetched HTML as test fixtures
 
 ## Phase 2: Knowledge base pipeline (E2)
 - [ ] `Person`, `Chunk` models + migrations [US-07, US-08]

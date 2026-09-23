@@ -1,0 +1,24 @@
+<div id="job-rows"
+     {% if job.status != "done" %}hx-get="{% url 'harvest:job_rows' job.id %}" hx-trigger="every 2s" hx-swap="outerHTML"{% endif %}>
+    <p>Job status: <strong>{{ job.status }}</strong> ({{ job.total_urls }} URLs, {{ job.skipped_rows }} skipped rows)</p>
+    <table>
+        <thead>
+            <tr>
+                <th>URL</th>
+                <th>Status</th>
+                <th>HTTP</th>
+                <th>Method</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td>{{ record.url }}</td>
+                <td>{{ record.status }}</td>
+                <td>{{ record.status_code|default:"—" }}</td>
+                <td>{{ record.fetch_method|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

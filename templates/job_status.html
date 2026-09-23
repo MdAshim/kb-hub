@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Job #{{ job.id }}{% endblock %}
+{% block content %}
+<h1>Job #{{ job.id }}: {{ job.original_filename }}</h1>
+{% include "_job_rows.html" %}
+{% endblock %}
