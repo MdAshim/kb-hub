@@ -101,6 +101,14 @@ tests/       pytest suite and HTML fixtures
 ## Known limitations
 - Some sites block automated clients or render content with JavaScript; these use the Playwright
   fallback and may still fail. Failures are recorded per URL and do not stop the job.
+- `https://informationevolution.com/company/` fails with a plain 404, not a bot block: the site
+  has restructured since the sample file was authored and no longer serves that path (confirmed
+  `/company` 404s even in a plain browser; leadership content now lives at `/about`). Not a
+  scraper bug — the sample URL is stale.
+- `https://ir.tesla.com/corporate` fails with a 403 from an Akamai edge/WAF rule
+  (`errors.edgesuite.net` reference ID in the response body), not a missing-JS-render issue.
+  This is CDN-level bot detection/IP-reputation blocking, not something a longer Playwright wait
+  or extra headers can get past — treated as out of scope for this project.
 - FAISS is a local file index, suited to a single-machine deployment.
 - Person extraction quality depends on the LLM; small local models (3B) are faster but less
   accurate than 8B. Results always link to their source page.
