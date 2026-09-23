@@ -21,7 +21,9 @@ Django 5 · Django REST Framework · Huey (SQLite backend) · requests + trafila
 sentence-transformers · FAISS · local LLM via Ollama (Groq optional) · HTMX
 
 ## Prerequisites
-- Python 3.11
+- Python 3.11 (on Windows, if `python --version` shows a different version, use the
+  full path to a 3.11 install, e.g. `C:\Users\<you>\AppData\Local\Programs\Python\Python311\python.exe`,
+  or `py -3.11` if the Python launcher is installed)
 - [Ollama](https://ollama.com/download) with a local model:
   ```bash
   ollama pull llama3.2:3b        # 8 GB RAM; use llama3.1:8b on 16 GB+

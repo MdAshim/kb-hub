@@ -4,11 +4,11 @@ Work top to bottom. Tick a box when the task is done and its tests pass.
 Story IDs refer to `BACKLOG.md`.
 
 ## Phase 0: Project setup
-- [ ] Create Django project `config` and apps `harvest`, `knowledge`, `search`, `api`
-- [ ] Settings read from `.env` (python-dotenv); `data/` created on startup
-- [ ] Configure `SqliteHuey` at `data/huey.db`
-- [ ] Configure pytest-django; add `tests/fixtures/html/`
-- [ ] Base template with nav (Upload, Jobs, Search) and HTMX
+- [x] Create Django project `config` and apps `harvest`, `knowledge`, `search`, `api`
+- [x] Settings read from `.env` (python-dotenv); `data/` created on startup
+- [x] Configure `SqliteHuey` at `data/huey.db`
+- [x] Configure pytest-django; add `tests/fixtures/html/`
+- [x] Base template with nav (Upload, Jobs, Search) and HTMX
 
 ## Phase 1: Upload and harvest (E1)
 - [ ] `HarvestJob`, `UrlRecord` models + migrations [US-01, US-05]
