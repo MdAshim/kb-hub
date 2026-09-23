@@ -24,19 +24,35 @@ Django 5 · Django REST Framework · Huey (SQLite backend) · requests + trafila
 sentence-transformers · FAISS · local LLM via Ollama (Groq optional) · HTMX
 
 ## Prerequisites
-- Python 3.11 (on Windows, if `python --version` shows a different version, use the
-  full path to a 3.11 install, e.g. `C:\Users\<you>\AppData\Local\Programs\Python\Python311\python.exe`,
-  or `py -3.11` if the Python launcher is installed)
+- Python 3.11 (on Windows, if `python --version` shows a different version, use
+  `py -3.11` if the Python launcher is installed — this is the simplest fix — or fall
+  back to the full path to a 3.11 install, e.g.
+  `C:\Users\<you>\AppData\Local\Programs\Python\Python311\python.exe`)
 - [Ollama](https://ollama.com/download) with a local model:
   ```bash
   ollama pull llama3.2:3b        # 8 GB RAM; use llama3.1:8b on 16 GB+
   ```
   Full instructions: [docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md)
+- **Minimum requirements**: roughly 8 GB of *free* RAM at run time (not just an 8 GB
+  machine) — Playwright, Ollama and the embedding model running together is genuinely
+  memory-hungry, and running low can cause the embedding model to fail to load.
+- **First-run downloads** (only once each, then cached): the Ollama model pull is
+  ~2 GB, Playwright's Chromium download is ~100 MB+, and the embedding model
+  (`BAAI/bge-small-en-v1.5`) is ~130 MB. None of this means the app is hanging.
 
 ## Quick start
 ```bash
-git clone <repo-url> kb_hub && cd kb_hub
-python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
+git clone <repo-url> kb_hub && cd kb_hub   # replace <repo-url> with wherever you're
+                                            # accessing this from (your GitHub fork,
+                                            # the provided ZIP, etc.)
+py -3.11 -m venv .venv                     # or: python -m venv .venv, if that's already 3.11
+python -m pip install --upgrade pip        # optional, but avoids old-pip resolver issues
+
+# Activate the venv -- run ONE of these three, matching your shell:
+source .venv/bin/activate                  # macOS/Linux
+source .venv/Scripts/activate              # Windows, git-bash/WSL
+.venv\Scripts\activate                     # Windows, CMD/PowerShell
+
 pip install -r requirements.txt
 playwright install chromium
 cp .env.example .env                                     # defaults to local Ollama; set OLLAMA_MODEL if needed
@@ -47,6 +63,12 @@ Run (Ollama must be running; it usually starts automatically, otherwise `ollama 
 ```bash
 python manage.py runserver      # http://127.0.0.1:8000
 python manage.py run_huey       # background worker
+```
+
+## Run the tests
+```bash
+pytest                 # fast suite (no network, no real LLM)
+pytest -m slow          # optional: includes a real-embedding-model test
 ```
 
 ## Usage

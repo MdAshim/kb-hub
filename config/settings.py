@@ -272,5 +272,13 @@ LOGGING = {
             "level": "WARNING",
             "propagate": False,
         },
+        # huey's own consumer already attaches a handler to this logger and
+        # logs through it; without propagate=False every huey log line also
+        # bubbles up to root's console handler, printing each line twice.
+        "huey": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
