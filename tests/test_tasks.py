@@ -57,6 +57,29 @@ def test_fetch_url_saves_fetched_fields(monkeypatch):
 
 
 @pytest.mark.django_db
+def test_fetch_url_clears_stale_error_on_success(monkeypatch):
+    # A record with a leftover error from a prior failed attempt must not
+    # keep showing it once a later fetch succeeds.
+    job = _make_job("https://example.com/a")
+    record = job.url_records.get()
+    record.error = "Connection refused"
+    record.save(update_fields=["error"])
+
+    monkeypatch.setattr(
+        tasks,
+        "fetch",
+        lambda url: FetchResult(status_code=200, html="<html>hi</html>", text="hi", method="requests"),
+    )
+    monkeypatch.setattr(tasks, "ingest_url", lambda record_id: None)
+
+    tasks.fetch_url.call_local(record.id)
+
+    record.refresh_from_db()
+    assert record.status == UrlRecord.STATUS_FETCHED
+    assert record.error == ""
+
+
+@pytest.mark.django_db
 def test_fetch_url_marks_failed_and_leaves_other_records_untouched(monkeypatch):
     # TC-11: a network-exception result marks the record failed without
     # touching sibling records or wrongly closing out the job.

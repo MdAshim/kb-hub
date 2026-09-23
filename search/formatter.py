@@ -15,9 +15,16 @@ logger = logging.getLogger(__name__)
 SYSTEM_PROMPT = (
     "Answer the user's question about people, using only the provided context. "
     'Return JSON only: {"answer":"","people":[{"name":"","role":"","company":"",'
-    '"summary":"","source_url":""}]}. Cite each person\'s source_url from the '
-    "context. If the context doesn't answer the question, say so in \"answer\" "
-    'and return an empty "people" list.'
+    '"summary":"","source_url":""}]}. '
+    '"answer" must always be a non-empty sentence: either a direct answer to the '
+    "question drawn from the context, or an explicit statement that the context "
+    "doesn't contain that information -- for example \"I don't have information "
+    "about Oracle's CFO in the retrieved content.\" or \"The provided context "
+    'doesn\'t mention a CEO of Microsoft.\" Never leave "answer" blank. '
+    'Only include people in "people" who are directly relevant to answering the '
+    "question, not everyone mentioned in the context. If no one in the context "
+    'answers the question, return an empty "people" list. Cite each included '
+    "person's source_url from the context."
 )
 
 
@@ -69,7 +76,13 @@ def _validate(query: str, data, chunks: list[RetrievedChunk]) -> SearchResult | 
         return None
     answer = data.get("answer")
     people_raw = data.get("people")
-    if not isinstance(answer, str) or not isinstance(people_raw, list):
+    # An empty/whitespace-only answer is treated the same as a missing one:
+    # don't rely on the model always following the "never leave answer blank"
+    # instruction -- fall back to the raw-chunks view instead of showing a
+    # blank answer box.
+    if not isinstance(answer, str) or not answer.strip():
+        return None
+    if not isinstance(people_raw, list):
         return None
 
     people: list[PersonResult] = []
@@ -89,4 +102,4 @@ def _validate(query: str, data, chunks: list[RetrievedChunk]) -> SearchResult | 
             )
         )
 
-    return SearchResult(query=query, llm_ok=True, answer=answer, people=people, chunks=chunks)
+    return SearchResult(query=query, llm_ok=True, answer=answer.strip(), people=people, chunks=chunks)

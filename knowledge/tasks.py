@@ -91,8 +91,9 @@ def ingest_url(record_id: int) -> None:
     all_chunks = list(Chunk.objects.filter(url_record=record).order_by("id"))
     if not all_chunks:
         record.status = UrlRecord.STATUS_INDEXED
+        record.error = ""  # clear any stale error from a prior failed attempt
         record.indexed_at = timezone.now()
-        record.save(update_fields=["status", "indexed_at"])
+        record.save(update_fields=["status", "error", "indexed_at"])
         update_job_status(record.job)
         return
 
@@ -110,6 +111,7 @@ def ingest_url(record_id: int) -> None:
         return
 
     record.status = UrlRecord.STATUS_INDEXED
+    record.error = ""  # clear any stale error from a prior failed attempt
     record.indexed_at = timezone.now()
-    record.save(update_fields=["status", "indexed_at"])
+    record.save(update_fields=["status", "error", "indexed_at"])
     update_job_status(record.job)

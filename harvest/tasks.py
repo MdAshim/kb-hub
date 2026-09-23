@@ -38,6 +38,7 @@ def fetch_url(record_id: int) -> None:
         record.error = result.error
     else:
         record.status = UrlRecord.STATUS_FETCHED
+        record.error = ""  # clear any stale error from a prior failed attempt
     record.fetched_at = timezone.now()
     record.save()
 

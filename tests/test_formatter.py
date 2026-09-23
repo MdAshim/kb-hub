@@ -93,3 +93,78 @@ def test_format_results_chunks_field_is_full_list_not_context_slice(monkeypatch,
     result = format_results("q", chunks)
 
     assert len(result.chunks) == 5
+
+
+def test_format_results_treats_empty_answer_as_invalid(monkeypatch, fake_llm):
+    # An empty "answer" is treated the same as a missing/invalid one -- don't
+    # rely on the model always following the "never leave answer blank"
+    # prompt instruction.
+    llm = fake_llm(response={"answer": "", "people": []})
+    monkeypatch.setattr("search.formatter.get_llm", lambda: llm)
+    chunks = [_chunk()]
+
+    result = format_results("Who is the CFO of Oracle?", chunks)
+
+    assert result.llm_ok is False
+    assert result.answer is None
+    assert result.chunks == chunks
+
+
+def test_format_results_treats_whitespace_only_answer_as_invalid(monkeypatch, fake_llm):
+    llm = fake_llm(response={"answer": "   \n  ", "people": []})
+    monkeypatch.setattr("search.formatter.get_llm", lambda: llm)
+
+    result = format_results("Who is the CEO of Microsoft?", [_chunk()])
+
+    assert result.llm_ok is False
+
+
+def test_format_results_accepts_explicit_not_found_answer(monkeypatch, fake_llm):
+    llm = fake_llm(
+        response={
+            "answer": "I don't have information about Oracle's CFO in the retrieved content.",
+            "people": [],
+        }
+    )
+    monkeypatch.setattr("search.formatter.get_llm", lambda: llm)
+
+    result = format_results("Who is the CFO of Oracle?", [_chunk()])
+
+    assert result.llm_ok is True
+    assert result.answer == "I don't have information about Oracle's CFO in the retrieved content."
+    assert result.people == []
+
+
+def test_format_results_passes_through_llm_people_list_unfiltered(monkeypatch, fake_llm):
+    # This is a prompt-quality concern ("only include directly relevant
+    # people"), not something format_results should filter in code -- it
+    # can't judge relevance better than the LLM already can with the full
+    # query in view. Confirm it just passes through whatever the LLM returns,
+    # even a person who (from a human's read) looks tangential to the query.
+    llm = fake_llm(
+        response={
+            "answer": "Jane Smith is the CEO.",
+            "people": [
+                {
+                    "name": "Jane Smith",
+                    "role": "CEO",
+                    "company": "Acme",
+                    "summary": "Leads Acme.",
+                    "source_url": "https://example.com/a",
+                },
+                {
+                    "name": "Someone Tangential",
+                    "role": "Regional Sales Rep",
+                    "company": "Acme",
+                    "summary": "Not who was asked about.",
+                    "source_url": "https://example.com/b",
+                },
+            ],
+        }
+    )
+    monkeypatch.setattr("search.formatter.get_llm", lambda: llm)
+
+    result = format_results("Who is the CEO?", [_chunk()])
+
+    assert result.llm_ok is True
+    assert [p.name for p in result.people] == ["Jane Smith", "Someone Tangential"]

@@ -161,6 +161,15 @@ EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
 EMBEDDING_DIM = _env_int("EMBEDDING_DIM", 384)
 FAISS_INDEX_PATH = BASE_DIR / os.environ.get("FAISS_INDEX_PATH", "data/faiss.index")
 
+# Under pytest, FAISS_INDEX_PATH must not point at the real dev index: unlike
+# SQLite (which pytest-django isolates automatically, an in-memory DB per
+# run), a FAISS index is a raw file outside Django's test machinery. A test
+# that doesn't explicitly stub get_vector_store() would otherwise silently
+# read/write real production vectors. Same rationale as the HUEY filename
+# override below.
+if "pytest" in sys.modules:
+    FAISS_INDEX_PATH = DATA_DIR / "faiss-test.index"
+
 # Chunking
 CHUNK_SIZE_TOKENS = _env_int("CHUNK_SIZE_TOKENS", 450)
 CHUNK_OVERLAP_TOKENS = _env_int("CHUNK_OVERLAP_TOKENS", 50)

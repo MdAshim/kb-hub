@@ -95,6 +95,26 @@ def test_ingest_url_keeps_text_chunks_when_extraction_fails(monkeypatch, tmp_pat
 
 
 @pytest.mark.django_db
+def test_ingest_url_clears_stale_error_on_success(monkeypatch, tmp_path, fake_embedder):
+    # A record with a leftover error from a prior failed ingest must not
+    # keep showing it once a later ingest succeeds.
+    record = _make_record("Some perfectly ordinary page text about a company.")
+    record.error = "The paging file is too small for this operation to complete."
+    record.save(update_fields=["error"])
+
+    store = VectorStore(path=tmp_path / "test.index", dim=fake_embedder.dim)
+    monkeypatch.setattr(tasks, "get_embedder", lambda: fake_embedder)
+    monkeypatch.setattr(tasks, "get_vector_store", lambda: store)
+    monkeypatch.setattr(tasks, "extract_people", lambda text, company_hint: [])
+
+    tasks.ingest_url.call_local(record.id)
+
+    record.refresh_from_db()
+    assert record.status == UrlRecord.STATUS_INDEXED
+    assert record.error == ""
+
+
+@pytest.mark.django_db
 def test_ingest_url_marks_failed_on_embedding_error(monkeypatch, tmp_path, fake_embedder):
     record = _make_record("Some page text.")
     store = VectorStore(path=tmp_path / "test.index", dim=fake_embedder.dim)
