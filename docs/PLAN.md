@@ -51,3 +51,12 @@ Story IDs refer to `BACKLOG.md`.
 - [ ] README screenshots and sample queries [US-17]
 - [ ] Update docs if the implementation diverged
 - [ ] Fresh-clone test: follow README from scratch on a clean venv
+
+## Phase 6: Submission packaging (E6)
+- [ ] `Dockerfile` + `docker-compose.yml` (web + huey worker, shared `data/` volume) [US-20]
+- [ ] `ruff` (or `flake8` + `black`) in `requirements.txt`; codebase lints clean; `make lint` [US-21]
+- [ ] `docs/DEPLOYMENT.md`: Docker-on-a-VM, env vars, production checklist [US-22]
+- [ ] README: `data/faiss.index`/`data/db.sqlite3` not committed; regeneration steps; Ollama model pull as an artifact step [US-23]
+- [ ] `docs/screenshots/`: upload, job mid-run, job done, search results, raw-chunks fallback, `/api/urls/`, `/api/search/`, admin Person view [US-24]
+- [ ] Demo video script (via `PROMPTS.md`); confirm every screen it references exists [US-24]
+- [ ] `SUBMISSION_NOTES.md`: questions/assumptions/difficulties, development time per phase (from git log), Other Observations [US-25]

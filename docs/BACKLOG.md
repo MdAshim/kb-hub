@@ -107,3 +107,67 @@ As an API client, I can call `GET /api/urls/`.
 ### US-19 Logging and errors (S)
 - Fetch, ingest and LLM errors are logged with the URL or job id.
 - The UI never shows a raw stack trace.
+
+## E6: Submission requirements
+
+Formal deliverables the client asked for on top of the working app. US-20 to US-22 are
+marked bonus by the client; US-23 to US-25 are required submission artifacts, not features.
+
+### US-20 Docker support (C, bonus)
+As a reviewer, I want to run the app without setting up a Python environment by hand.
+- A `Dockerfile` for the Django app.
+- A `docker-compose.yml` running `web` and the huey worker as separate services, sharing
+  the `data/` volume.
+- Ollama runs on the host, not in Docker; `DEPLOYMENT.md` documents why (GPU access and
+  model-download size/time are a poor fit for a container built for this assignment).
+- `docker-compose up` brings up a working app against an already-running host Ollama.
+
+### US-21 PEP 8 / lint compliance (C, bonus)
+As a reviewer, I want the codebase to pass a standard linter cleanly.
+- `ruff` (or `flake8` + `black`) added to `requirements.txt` as dev dependencies.
+- The linter runs clean across the codebase (violations fixed, not suppressed).
+- A documented command (e.g. `make lint`) runs it.
+
+### US-22 Deployment documentation (C, bonus)
+As a reviewer, I want to understand how this would be deployed for real.
+- `docs/DEPLOYMENT.md` covers: running in Docker on a single VM, required env vars, and
+  what must change for production (`DEBUG=False`, `ALLOWED_HOSTS`, a real secret key,
+  serving static files).
+- The doc states plainly that this is a documentation deliverable, not an actual cloud
+  deployment carried out as part of the assignment.
+
+### US-23 Model artifacts and regeneration instructions (S)
+As a reviewer cloning the repo, I want to know why the FAISS index and database aren't
+there and how to get a working one.
+- README states plainly that `data/faiss.index` and `data/db.sqlite3` are not committed
+  (gitignored, machine-specific).
+- README documents regeneration: run migrations, then either upload the sample file, or
+  run `python manage.py rebuild_index` if `Chunk` rows already exist in SQLite but the
+  FAISS file is missing.
+- README documents pulling the Ollama model as a required "artifact" step, since ingestion
+  depends on it.
+
+### US-24 Screenshots and demo video (S)
+As a reviewer, I want to see the app working without necessarily running it myself.
+- `docs/screenshots/` contains: upload page, job status page mid-run, job status done,
+  search results with person cards, the raw-chunks fallback view, `/api/urls/` response,
+  `/api/search/` response, Django admin showing a `Person` record.
+- A demo script for a ~2 minute walkthrough video exists (drafted via the reusable prompt
+  in `PROMPTS.md`); every screen it references actually exists and works.
+- Recording the video itself is the client's responsibility, not part of this story.
+
+### US-25 Submission notes document (S)
+As a reviewer, I want the development process made transparent: what was unclear, how
+long things took, and what the author would change.
+- A top-level `SUBMISSION_NOTES.md` with three sections:
+  - **Questions, assumptions and difficulties** — pulled from every phase's plan where an
+    ambiguity, assumption, or real problem-and-fix came up (e.g. the circular-import fix,
+    the 4xx/5xx fetcher bug, the two failed sample URLs, the `company_hint` source choice).
+    1-3 sentences each: what was unclear/wrong, what was assumed or how it was fixed.
+  - **Development time per task** — one row per phase (0 through 6) with start/end
+    timestamps and elapsed time, computed from actual git log commit timestamps (that
+    phase's commit vs. the previous one) — not estimated. Noted as AI-assisted development
+    time, not manual coding time.
+  - **Other Observations** (exact heading) — an honest take on what could be improved:
+    what would be done differently with more time, any design compromise not fully settled,
+    and anything about the assignment brief itself that was ambiguous or unclear.
