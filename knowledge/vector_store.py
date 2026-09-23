@@ -59,6 +59,9 @@ class VectorStore:
         with self._lock:
             self._index = faiss.IndexIDMap(faiss.IndexFlatIP(self.dim))
 
+    def count(self) -> int:
+        return self._index.ntotal
+
 
 _vector_store: VectorStore | None = None
 

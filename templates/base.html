@@ -10,8 +10,7 @@
     <nav>
         <a href="{% url 'harvest:upload' %}">Upload</a>
         <a href="{% url 'harvest:job_list' %}">Jobs</a>
-        <!-- TODO: switch to a named-url reverse tag once the search view exists (Phase 3) -->
-        <a href="/search/">Search</a>
+        <a href="{% url 'search:search' %}">Search</a>
     </nav>
     <main>
         {% block content %}{% endblock %}

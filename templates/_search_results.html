@@ -1,0 +1,36 @@
+{% if not query %}
+{% elif error %}
+    <p class="error">{{ error }}</p>
+{% elif empty_index %}
+    <p>Nothing indexed yet. Upload and harvest some URLs first.</p>
+{% else %}
+    {% if not result.llm_ok %}
+        <p class="notice">The AI assistant is unavailable right now — showing the raw matching passages instead.</p>
+    {% else %}
+        <div class="answer">{{ result.answer }}</div>
+        <div class="people">
+            {% for person in result.people %}
+            <div class="person-card">
+                <h3>{{ person.name }}</h3>
+                <p>{{ person.role }}{% if person.company %} · {{ person.company }}{% endif %}</p>
+                <p>{{ person.summary }}</p>
+                {% if person.source_url %}<a href="{{ person.source_url }}" target="_blank" rel="noopener">Source</a>{% endif %}
+            </div>
+            {% empty %}
+            <p>No matching people found.</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <details class="sources">
+        <summary>Sources ({{ result.chunks|length }})</summary>
+        <ul>
+            {% for chunk in result.chunks %}
+            <li>
+                <strong>{{ chunk.score|floatformat:3 }}</strong> [{{ chunk.kind }}]
+                <a href="{{ chunk.url }}" target="_blank" rel="noopener">{{ chunk.url }}</a>
+                <p>{{ chunk.text|truncatewords:60 }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+    </details>
+{% endif %}

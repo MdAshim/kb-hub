@@ -33,10 +33,10 @@ Story IDs refer to `BACKLOG.md`.
 - [x] `rebuild_index` management command [US-09]
 
 ## Phase 3: Search (E3)
-- [ ] `retriever.retrieve()` with person boost [US-10]
-- [ ] `formatter.format_results()` LLM prompt -> `{answer, people[]}` [US-11]
-- [ ] Fallback to raw chunks on LLM failure; empty-index message [US-12]
-- [ ] Search page: form, answer, person cards, collapsible sources [US-10, US-11]
+- [x] `retriever.retrieve()` with person boost [US-10]
+- [x] `formatter.format_results()` LLM prompt -> `{answer, people[]}` [US-11]
+- [x] Fallback to raw chunks on LLM failure; empty-index message [US-12]
+- [x] Search page: form, answer, person cards, collapsible sources [US-10, US-11]
 
 ## Phase 4: REST API (E4)
 - [ ] `UrlRecordSerializer` with `include_html` toggle [US-13]
