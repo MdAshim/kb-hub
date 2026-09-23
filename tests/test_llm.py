@@ -57,9 +57,8 @@ def test_ollama_client_connection_error_raises_llm_error_and_logs(monkeypatch, c
 
     monkeypatch.setattr("requests.post", _raise)
 
-    with caplog.at_level("ERROR"):
-        with pytest.raises(LLMError, match="ollama serve"):
-            client.complete_json(system="sys", user="hello")
+    with caplog.at_level("ERROR"), pytest.raises(LLMError, match="ollama serve"):
+        client.complete_json(system="sys", user="hello")
 
     assert any(r.levelname == "ERROR" for r in caplog.records)
 

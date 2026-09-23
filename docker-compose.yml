@@ -1,0 +1,38 @@
+services:
+  web:
+    build: .
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      # .env's default (http://localhost:11434) won't reach the host from
+      # inside a container -- "localhost" there means the container itself.
+      # host.docker.internal works out of the box on Docker Desktop
+      # (Mac/Windows); on native Linux it needs the extra_hosts line below
+      # (Docker Engine 20.10+).
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data:/app/data
+      - ./media:/app/media
+
+  huey:
+    build: .
+    command: python manage.py run_huey
+    env_file:
+      - .env
+    environment:
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data:/app/data
+      - ./media:/app/media
+    # Do not scale this service (`docker-compose up --scale huey=N`) or run
+    # multiple replicas: knowledge/vector_store.py's write lock is a
+    # threading.Lock, which only serializes writes within one process. It
+    # gives no protection across separate huey containers, so more than one
+    # would risk corrupting the FAISS index. See docs/DEPLOYMENT.md.

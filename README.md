@@ -71,6 +71,11 @@ pytest                 # fast suite (no network, no real LLM)
 pytest -m slow          # optional: includes a real-embedding-model test
 ```
 
+## Lint
+```bash
+ruff check .            # matches CI; see pyproject.toml for the (small) rule exceptions
+```
+
 ## Usage
 1. Open `http://127.0.0.1:8000/` and upload `samples/Leadership_URL.xlsx`.
 2. Watch the job page; each URL shows its status, HTTP code and fetch method.
@@ -122,6 +127,21 @@ tests/       pytest suite and HTML fixtures
 | [TESTING](docs/TESTING.md) | Test strategy and cases |
 | [DECISIONS](docs/DECISIONS.md) | Architecture decision records |
 | [LOCAL_SETUP](docs/LOCAL_SETUP.md) | Installing Ollama and the local models |
+| [DEPLOYMENT](docs/DEPLOYMENT.md) | Running the Docker Compose stack, production checklist |
+
+## Data & model artifacts
+`data/db.sqlite3` and `data/faiss.index` are **not committed** — they're gitignored and
+machine-specific (raw scraped content and vectors from whatever you've harvested locally).
+After a fresh clone there's nothing to search yet. To get a working index:
+- **From scratch**: `python manage.py migrate`, then upload a file through the app (or
+  `samples/Leadership_URL.xlsx`) — fetching and ingestion populate both files automatically.
+- **FAISS file missing or lost, but data is still in SQLite** (e.g. `Chunk` rows exist but
+  `data/faiss.index` was deleted or never committed): `python manage.py rebuild_index`
+  re-embeds every existing `Chunk` row into a fresh index without re-scraping anything.
+- **The Ollama model is also a required "artifact"** in the same sense — ingestion depends
+  on it being pulled locally (`ollama pull llama3.2:3b`, see
+  [docs/LOCAL_SETUP.md](docs/LOCAL_SETUP.md)); nothing about it is committed to the repo
+  either.
 
 ## Known limitations
 - Some sites block automated clients or render content with JavaScript; these use the Playwright

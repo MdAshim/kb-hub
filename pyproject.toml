@@ -1,0 +1,11 @@
+[tool.ruff]
+extend-exclude = ["*/migrations/*"]  # Django-generated, not hand-styled
+
+[tool.ruff.lint]
+ignore = [
+    # Django model *_CHOICES lists and DRF serializer Meta.fields lists are
+    # ordinary class-level attributes in both frameworks' idioms -- RUF012
+    # doesn't know that and would otherwise want every one of them annotated
+    # as typing.ClassVar, which isn't idiomatic Django/DRF style.
+    "RUF012",
+]

@@ -53,10 +53,10 @@ Story IDs refer to `BACKLOG.md`.
 - [ ] Fresh-clone test: follow README from scratch on a clean venv
 
 ## Phase 6: Submission packaging (E6)
-- [ ] `Dockerfile` + `docker-compose.yml` (web + huey worker, shared `data/` volume) [US-20]
-- [ ] `ruff` (or `flake8` + `black`) in `requirements.txt`; codebase lints clean; `make lint` [US-21]
-- [ ] `docs/DEPLOYMENT.md`: Docker-on-a-VM, env vars, production checklist [US-22]
-- [ ] README: `data/faiss.index`/`data/db.sqlite3` not committed; regeneration steps; Ollama model pull as an artifact step [US-23]
-- [ ] `docs/screenshots/`: upload, job mid-run, job done, search results, raw-chunks fallback, `/api/urls/`, `/api/search/`, admin Person view [US-24]
-- [ ] Demo video script (via `PROMPTS.md`); confirm every screen it references exists [US-24]
-- [ ] `SUBMISSION_NOTES.md`: questions/assumptions/difficulties, development time per phase (from git log), Other Observations [US-25]
+- [x] `Dockerfile` + `docker-compose.yml` (web + huey worker, shared `data/` volume) [US-20]
+- [x] `ruff` in `requirements.txt`; codebase lints clean; documented in README/CLAUDE.md (no Makefile -- no `make` convention anywhere else in this Windows-primary project) [US-21]
+- [x] `docs/DEPLOYMENT.md`: Docker-on-a-VM, env vars, production checklist [US-22]
+- [x] README: `data/faiss.index`/`data/db.sqlite3` not committed; regeneration steps; Ollama model pull as an artifact step [US-23]
+- [x] `docs/screenshots/`: upload, job mid-run, job done, search results, raw-chunks fallback, `/api/urls/`, `/api/search/`, admin Person view [US-24]
+- [x] Demo video script (`docs/DEMO_SCRIPT.md` -- `PROMPTS.md` doesn't exist in this repo); every screen it references captured live and confirmed working [US-24]
+- [x] `SUBMISSION_NOTES.md`: questions/assumptions/difficulties, development time per phase (from git log), Other Observations [US-25]

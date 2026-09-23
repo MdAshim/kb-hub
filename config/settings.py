@@ -145,6 +145,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
+# Needed for `collectstatic` in production (DEBUG=False disables Django's
+# automatic static serving entirely -- see docs/DEPLOYMENT.md). Unused in
+# local dev, where DEBUG=True serves static files directly.
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

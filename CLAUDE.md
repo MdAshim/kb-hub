@@ -29,6 +29,7 @@ python manage.py runserver          # web app
 python manage.py run_huey           # background worker (separate terminal)
 pytest                              # tests
 python manage.py rebuild_index      # re-embed all chunks into a fresh FAISS index
+ruff check .                        # lint
 ```
 
 ## Layout

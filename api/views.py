@@ -14,7 +14,11 @@ from knowledge.vector_store import get_vector_store
 from search.formatter import format_results
 from search.retriever import retrieve
 
-from .serializers import HarvestJobSerializer, SearchRequestSerializer, UrlRecordSerializer
+from .serializers import (
+    HarvestJobSerializer,
+    SearchRequestSerializer,
+    UrlRecordSerializer,
+)
 
 
 class UrlRecordPagination(PageNumberPagination):

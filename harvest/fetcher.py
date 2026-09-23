@@ -41,7 +41,9 @@ def fetch(url: str) -> FetchResult:
             if result.error:
                 return result
         return _finalize(result)
-    except Exception as exc:  # defensive: a URL failure must never crash the task
+    except Exception as exc:  # noqa: BLE001 -- defensive: a URL failure must never
+        # crash the task. Not logged here: harvest.tasks.fetch_url logs this
+        # FetchResult.error one level up; logging it here too would double-log.
         return FetchResult(error=str(exc))
 
 
@@ -116,7 +118,7 @@ def _fetch_playwright(url: str) -> FetchResult:
                 )
             finally:
                 browser.close()
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 -- same reasoning as fetch()'s catch above
         return FetchResult(error=str(exc), method="playwright")
 
 
