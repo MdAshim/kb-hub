@@ -85,6 +85,7 @@ def test_fetch_falls_back_to_playwright_on_403(monkeypatch, html_fixtures_dir):
 
 
 def test_fetch_marks_http_error_status_as_failed(monkeypatch, html_fixtures_dir):
+    # TC-31
     # A non-2xx status is a failure even with plenty of extracted text and no
     # exception raised (LLD error table: 4xx/5xx -> failed), so no fallback
     # is triggered here (404 isn't in FALLBACK_STATUS_CODES, text is long).

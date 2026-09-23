@@ -49,6 +49,7 @@ def test_person_chunk_ranks_above_equal_score_text_chunk(monkeypatch):
 
 @pytest.mark.django_db
 def test_retrieve_ignores_orphan_faiss_ids(monkeypatch):
+    # TC-55
     record = _make_record()
     real_chunk = Chunk.objects.create(
         url_record=record, kind=Chunk.KIND_TEXT, chunk_index=0, text="Real chunk."
@@ -66,6 +67,7 @@ def test_retrieve_ignores_orphan_faiss_ids(monkeypatch):
 
 @pytest.mark.django_db
 def test_retrieve_returns_empty_list_when_no_hits(monkeypatch):
+    # TC-56
     stub = _StubVectorStore([])
     monkeypatch.setattr(retriever, "get_vector_store", lambda: stub)
     monkeypatch.setattr(retriever, "get_embedder", lambda: SimpleNamespace(embed_query=lambda q: None))

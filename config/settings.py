@@ -232,4 +232,45 @@ if "pytest" in sys.modules:
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+    # Unhandled exceptions in api/ views return {"detail": "Internal error."}
+    # (per API.md) instead of leaking a traceback; the real exception is
+    # still logged server-side. See api/exceptions.py.
+    "EXCEPTION_HANDLER": "api.exceptions.exception_handler",
+}
+
+
+# ---------------------------------------------------------------------------
+# Logging. fetch_url, ingest_url and every search/llm.py call log at INFO
+# with the relevant record/job id or query; failures log at ERROR with the
+# exception traceback (logger.exception / exc_info=True). The UI never shows
+# a raw stack trace: see templates/404.html, templates/500.html and
+# api/exceptions.py.
+# ---------------------------------------------------------------------------
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{asctime} {levelname} {name}: {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+    },
 }

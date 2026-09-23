@@ -3,10 +3,24 @@
 from __future__ import annotations
 
 import json
+import logging
 from abc import ABC, abstractmethod
 
 import requests
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
+
+_PREVIEW_CHARS = 120
+
+
+def _preview(text: str) -> str:
+    """A short, single-line stand-in for "the relevant query" in log lines.
+    complete_json() is shared by extraction (record-scoped) and search
+    (query-scoped) callers, so it has no record_id/job_id/query of its own --
+    the user message already contains whichever of those applies."""
+    text = " ".join(text.split())
+    return text[:_PREVIEW_CHARS] + ("..." if len(text) > _PREVIEW_CHARS else "")
 
 
 class LLMError(Exception):
@@ -40,6 +54,7 @@ class OllamaClient(LLMClient):
 
     def complete_json(self, system: str, user: str, timeout: int | None = None) -> dict:
         timeout = timeout or settings.LLM_TIMEOUT_SECONDS
+        logger.info("OllamaClient.complete_json: model=%s user=%r", self.model, _preview(user))
         try:
             response = requests.post(
                 f"{self.base_url}/api/chat",
@@ -57,12 +72,18 @@ class OllamaClient(LLMClient):
             )
             response.raise_for_status()
         except requests.ConnectionError as exc:
+            logger.exception("Ollama not reachable: model=%s", self.model)
             raise LLMError("Ollama not reachable; run `ollama serve`") from exc
         except requests.RequestException as exc:
+            logger.exception("Ollama request failed: model=%s", self.model)
             raise LLMError(str(exc)) from exc
 
         content = response.json()["message"]["content"]
-        return _parse_json(content)
+        try:
+            return _parse_json(content)
+        except LLMError:
+            logger.exception("Ollama returned unparseable JSON: model=%s", self.model)
+            raise
 
 
 class GroqClient(LLMClient):
@@ -73,6 +94,7 @@ class GroqClient(LLMClient):
         self.model = settings.GROQ_MODEL
 
     def complete_json(self, system: str, user: str, timeout: int | None = None) -> dict:
+        logger.info("GroqClient.complete_json: model=%s user=%r", self.model, _preview(user))
         try:
             completion = self.client.chat.completions.create(
                 model=self.model,
@@ -84,10 +106,15 @@ class GroqClient(LLMClient):
                 ],
             )
         except Exception as exc:
+            logger.exception("Groq request failed: model=%s", self.model)
             raise LLMError(str(exc)) from exc
 
         content = completion.choices[0].message.content
-        return _parse_json(content)
+        try:
+            return _parse_json(content)
+        except LLMError:
+            logger.exception("Groq returned unparseable JSON: model=%s", self.model)
+            raise
 
 
 def get_llm() -> LLMClient:

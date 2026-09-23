@@ -7,6 +7,7 @@ from knowledge.embedder import Embedder
 
 @pytest.mark.slow
 def test_real_embedder_produces_normalized_vectors_of_the_configured_dim():
+    # TC-42
     embedder = Embedder()
 
     doc_vectors = embedder.embed_documents(["Jane Smith is the CEO.", "John Doe is the CFO."])

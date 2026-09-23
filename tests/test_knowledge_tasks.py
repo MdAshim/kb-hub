@@ -96,6 +96,7 @@ def test_ingest_url_keeps_text_chunks_when_extraction_fails(monkeypatch, tmp_pat
 
 @pytest.mark.django_db
 def test_ingest_url_clears_stale_error_on_success(monkeypatch, tmp_path, fake_embedder):
+    # TC-52 (paired with test_tasks.py::test_fetch_url_clears_stale_error_on_success)
     # A record with a leftover error from a prior failed ingest must not
     # keep showing it once a later ingest succeeds.
     record = _make_record("Some perfectly ordinary page text about a company.")
@@ -116,6 +117,7 @@ def test_ingest_url_clears_stale_error_on_success(monkeypatch, tmp_path, fake_em
 
 @pytest.mark.django_db
 def test_ingest_url_marks_failed_on_embedding_error(monkeypatch, tmp_path, fake_embedder):
+    # TC-53
     record = _make_record("Some page text.")
     store = VectorStore(path=tmp_path / "test.index", dim=fake_embedder.dim)
     monkeypatch.setattr(tasks, "get_vector_store", lambda: store)

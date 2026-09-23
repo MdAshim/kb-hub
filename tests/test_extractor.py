@@ -24,6 +24,7 @@ def test_extract_people_with_valid_llm_json(monkeypatch, fake_llm):
 
 
 def test_extract_people_drops_invalid_items_and_dedupes(monkeypatch, fake_llm):
+    # TC-43
     llm = fake_llm(
         response={
             "people": [
@@ -56,6 +57,7 @@ def test_extract_people_with_invalid_json_is_logged_and_returns_empty(monkeypatc
 
 
 def test_extract_people_on_contentless_page_finds_nobody(monkeypatch, fake_llm, html_fixtures_dir):
+    # TC-44
     # informationevolution.com/company/ 404s (the site restructured; its real
     # leadership content now lives at /about instead) -- this saved fixture is
     # that dead page, used here as a realistic "no people on this page" case.

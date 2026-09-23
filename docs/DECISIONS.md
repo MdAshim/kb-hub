@@ -35,7 +35,8 @@ Format: context, decision, consequences.
 - **Context:** The brief asks for person-related retrieval and prefers chunk-based or structured retrieval.
   Plain chunks often separate a name from its title.
 - **Decision:** At ingest, the LLM extracts people into a Person table, and each person gets its
-  own embedded "card" chunk. Retrieval boosts person chunks.
+  own embedded "card" chunk. Retrieval boosts person chunks. (See also ADR-010 for the JSON-LD
+  complement to this LLM-based extraction.)
 - **Consequences:** Much better answers for "who is X" queries; structured data is queryable in
   SQLite. Costs one LLM call per page at ingest; if extraction fails, text chunks still work.
 

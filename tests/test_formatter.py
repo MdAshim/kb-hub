@@ -50,6 +50,7 @@ def test_format_results_when_llm_raises(monkeypatch, fake_llm):
 
 
 def test_format_results_rejects_malformed_top_level_shape(monkeypatch, fake_llm):
+    # TC-45
     llm = fake_llm(response={"answer": "ok", "people": "not-a-list"})
     monkeypatch.setattr("search.formatter.get_llm", lambda: llm)
 
@@ -59,6 +60,7 @@ def test_format_results_rejects_malformed_top_level_shape(monkeypatch, fake_llm)
 
 
 def test_format_results_skips_malformed_person_items(monkeypatch, fake_llm):
+    # TC-46
     llm = fake_llm(
         response={
             "answer": "ok",
@@ -85,6 +87,7 @@ def test_format_results_skips_malformed_person_items(monkeypatch, fake_llm):
 
 
 def test_format_results_chunks_field_is_full_list_not_context_slice(monkeypatch, fake_llm, settings):
+    # TC-47
     settings.SEARCH_CONTEXT_CHUNKS = 2
     llm = fake_llm(response={"answer": "ok", "people": []})
     monkeypatch.setattr("search.formatter.get_llm", lambda: llm)
@@ -96,6 +99,7 @@ def test_format_results_chunks_field_is_full_list_not_context_slice(monkeypatch,
 
 
 def test_format_results_treats_empty_answer_as_invalid(monkeypatch, fake_llm):
+    # TC-48 (paired with test_format_results_treats_whitespace_only_answer_as_invalid below)
     # An empty "answer" is treated the same as a missing/invalid one -- don't
     # rely on the model always following the "never leave answer blank"
     # prompt instruction.
@@ -111,6 +115,7 @@ def test_format_results_treats_empty_answer_as_invalid(monkeypatch, fake_llm):
 
 
 def test_format_results_treats_whitespace_only_answer_as_invalid(monkeypatch, fake_llm):
+    # TC-48
     llm = fake_llm(response={"answer": "   \n  ", "people": []})
     monkeypatch.setattr("search.formatter.get_llm", lambda: llm)
 
@@ -120,6 +125,7 @@ def test_format_results_treats_whitespace_only_answer_as_invalid(monkeypatch, fa
 
 
 def test_format_results_accepts_explicit_not_found_answer(monkeypatch, fake_llm):
+    # TC-49
     llm = fake_llm(
         response={
             "answer": "I don't have information about Oracle's CFO in the retrieved content.",
@@ -136,6 +142,7 @@ def test_format_results_accepts_explicit_not_found_answer(monkeypatch, fake_llm)
 
 
 def test_format_results_passes_through_llm_people_list_unfiltered(monkeypatch, fake_llm):
+    # TC-50
     # This is a prompt-quality concern ("only include directly relevant
     # people"), not something format_results should filter in code -- it
     # can't judge relevance better than the LLM already can with the full

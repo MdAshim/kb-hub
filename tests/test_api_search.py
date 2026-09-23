@@ -23,6 +23,7 @@ def test_search_empty_query_returns_400(client):
 
 @pytest.mark.django_db
 def test_search_missing_query_returns_400(client):
+    # TC-33
     response = client.post(
         reverse("api:search"), data=json.dumps({}), content_type="application/json"
     )
@@ -33,6 +34,7 @@ def test_search_missing_query_returns_400(client):
 
 @pytest.mark.django_db
 def test_search_top_k_out_of_range_returns_400(client):
+    # TC-34
     response = client.post(
         reverse("api:search"),
         data=json.dumps({"query": "who is the CEO?", "top_k": 50}),
@@ -45,6 +47,7 @@ def test_search_top_k_out_of_range_returns_400(client):
 
 @pytest.mark.django_db
 def test_search_on_empty_index_returns_503(client):
+    # TC-23 (API surface; the HTML-page half is test_search_view.py::test_search_empty_index_shows_message)
     response = client.post(
         reverse("api:search"),
         data=json.dumps({"query": "who is the CEO?"}),
@@ -120,6 +123,7 @@ def test_search_valid_query_returns_answer_people_and_sources(monkeypatch, clien
 
 @pytest.mark.django_db
 def test_search_llm_failure_returns_llm_ok_false_with_sources(monkeypatch, client, fake_llm, tmp_path):
+    # TC-35
     job = HarvestJob.objects.create(
         original_filename="t.csv", status=HarvestJob.STATUS_DONE, total_urls=1
     )

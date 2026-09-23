@@ -58,6 +58,7 @@ def test_fetch_url_saves_fetched_fields(monkeypatch):
 
 @pytest.mark.django_db
 def test_fetch_url_clears_stale_error_on_success(monkeypatch):
+    # TC-52 (paired with test_knowledge_tasks.py::test_ingest_url_clears_stale_error_on_success)
     # A record with a leftover error from a prior failed attempt must not
     # keep showing it once a later fetch succeeds.
     job = _make_job("https://example.com/a")

@@ -46,10 +46,10 @@ Story IDs refer to `BACKLOG.md`.
 - [x] `GET /api/jobs/{id}/` [US-16]
 
 ## Phase 5: Quality and delivery (E5)
-- [ ] Complete test cases in `TESTING.md` [US-18]
-- [ ] Logging config; friendly error pages [US-19]
+- [x] Complete test cases in `TESTING.md` [US-18]
+- [x] Logging config; friendly error pages [US-19]
 - [ ] README screenshots and sample queries [US-17]
-- [ ] Update docs if the implementation diverged
+- [x] Update docs if the implementation diverged
 - [ ] Fresh-clone test: follow README from scratch on a clean venv
 
 ## Phase 6: Submission packaging (E6)

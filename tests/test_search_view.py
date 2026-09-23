@@ -20,6 +20,7 @@ def test_search_empty_index_shows_message(client):
 
 @pytest.mark.django_db
 def test_search_validates_short_query(client):
+    # TC-57
     response = client.get(reverse("search:search"), {"q": "ab"})
 
     assert response.status_code == 200
@@ -28,6 +29,7 @@ def test_search_validates_short_query(client):
 
 @pytest.mark.django_db
 def test_search_no_query_renders_empty_results(client):
+    # TC-58
     response = client.get(reverse("search:search"))
 
     assert response.status_code == 200
@@ -36,6 +38,7 @@ def test_search_no_query_renders_empty_results(client):
 
 @pytest.mark.django_db
 def test_search_htmx_request_returns_partial_only(client):
+    # TC-59
     response = client.get(
         reverse("search:search"), {"q": "who is the CEO?"}, HTTP_HX_REQUEST="true"
     )
@@ -48,6 +51,7 @@ def test_search_htmx_request_returns_partial_only(client):
 
 @pytest.mark.django_db
 def test_search_renders_person_card_on_success(client, monkeypatch, fake_llm, tmp_path):
+    # TC-60
     job = HarvestJob.objects.create(
         original_filename="t.csv", status=HarvestJob.STATUS_DONE, total_urls=1
     )

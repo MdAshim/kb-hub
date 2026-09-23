@@ -52,6 +52,7 @@ def test_list_urls_include_html_false_omits_raw_html(client):
 
 @pytest.mark.django_db
 def test_list_urls_include_text_true_adds_clean_text(client):
+    # TC-36
     _make_records(status_codes=[200])
 
     response = client.get(reverse("api:urlrecord-list"), {"include_text": "true"})
@@ -74,6 +75,7 @@ def test_list_urls_filters_by_status_code(client):
 
 @pytest.mark.django_db
 def test_list_urls_filters_by_job(client):
+    # TC-37
     job_a = HarvestJob.objects.create(original_filename="a.csv", status=HarvestJob.STATUS_DONE, total_urls=1)
     job_b = HarvestJob.objects.create(original_filename="b.csv", status=HarvestJob.STATUS_DONE, total_urls=1)
     UrlRecord.objects.create(job=job_a, url="https://example.com/a", status_code=200)
@@ -88,6 +90,7 @@ def test_list_urls_filters_by_job(client):
 
 @pytest.mark.django_db
 def test_list_urls_page_size_param(client):
+    # TC-38
     _make_records(status_codes=[200] * 5)
 
     response = client.get(reverse("api:urlrecord-list"), {"page_size": 2})
@@ -108,6 +111,7 @@ def test_retrieve_url_returns_404_for_unknown_id(client):
 
 @pytest.mark.django_db
 def test_retrieve_url_always_includes_raw_html_and_clean_text(client):
+    # TC-39
     (record,) = _make_records(status_codes=[200])
 
     # Even with include_html=false, the detail endpoint always includes both.

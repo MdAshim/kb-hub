@@ -34,7 +34,11 @@ def ingest_url(record_id: int) -> None:
     try:
         record = UrlRecord.objects.select_related("job").get(id=record_id)
     except UrlRecord.DoesNotExist:
+        logger.error("ingest_url: no UrlRecord with id=%s", record_id)
         return
+
+    job_id = record.job_id
+    logger.info("ingest_url starting: record_id=%s job_id=%s url=%s", record.id, job_id, record.url)
 
     vector_store = get_vector_store()
     old_chunk_ids = list(Chunk.objects.filter(url_record=record).values_list("id", flat=True))
@@ -46,7 +50,9 @@ def ingest_url(record_id: int) -> None:
     try:
         json_ld_people = extract_json_ld_people(record.raw_html)
     except Exception:
-        logger.exception("extract_json_ld_people raised unexpectedly for record %s", record.id)
+        logger.exception(
+            "extract_json_ld_people raised unexpectedly: record_id=%s job_id=%s", record.id, job_id
+        )
         json_ld_people = []
 
     text_pieces = chunk_text(
@@ -61,7 +67,9 @@ def ingest_url(record_id: int) -> None:
     try:
         llm_people = extract_people(record.clean_text, company_hint)
     except Exception:
-        logger.exception("extract_people raised unexpectedly for record %s", record.id)
+        logger.exception(
+            "extract_people raised unexpectedly: record_id=%s job_id=%s", record.id, job_id
+        )
         llm_people = []
 
     people: list[PersonData] = list(json_ld_people)
@@ -94,6 +102,9 @@ def ingest_url(record_id: int) -> None:
         record.error = ""  # clear any stale error from a prior failed attempt
         record.indexed_at = timezone.now()
         record.save(update_fields=["status", "error", "indexed_at"])
+        logger.info(
+            "ingest_url succeeded (no chunks): record_id=%s job_id=%s", record.id, job_id
+        )
         update_job_status(record.job)
         return
 
@@ -103,7 +114,9 @@ def ingest_url(record_id: int) -> None:
         vector_store.add([c.id for c in all_chunks], vectors)
         vector_store.save()
     except Exception as exc:
-        logger.exception("Embedding/FAISS failure for record %s", record.id)
+        logger.exception(
+            "Embedding/FAISS failure: record_id=%s job_id=%s", record.id, job_id
+        )
         record.status = UrlRecord.STATUS_FAILED
         record.error = str(exc)
         record.save(update_fields=["status", "error"])
@@ -114,4 +127,8 @@ def ingest_url(record_id: int) -> None:
     record.error = ""  # clear any stale error from a prior failed attempt
     record.indexed_at = timezone.now()
     record.save(update_fields=["status", "error", "indexed_at"])
+    logger.info(
+        "ingest_url succeeded: record_id=%s job_id=%s chunks=%s people=%s",
+        record.id, job_id, len(all_chunks), len(people),
+    )
     update_job_status(record.job)

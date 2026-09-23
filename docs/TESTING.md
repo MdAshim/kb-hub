@@ -54,6 +54,54 @@
 | TC-28 | US-15 | POST /api/search/ empty query | 400 |
 | TC-29 | US-15 | POST /api/search/ valid | 200 with answer/people/sources |
 | TC-30 | US-16 | GET /api/jobs/{id}/ | counts per status |
+| TC-31 | US-04 | Mocked 4xx/5xx with no exception raised | Record marked `failed` per the LLD error table, even though the HTTP call itself succeeded |
+| TC-32 | US-16 | GET /api/jobs/{id}/ unknown id | 404 |
+| TC-33 | US-15 | POST /api/search/ missing `query` field | 400 |
+| TC-34 | US-15 | POST /api/search/ `top_k` out of range | 400 |
+| TC-35 | US-15 | POST /api/search/ LLM failure | `llm_ok` false, `people` empty, `sources` still populated |
+| TC-36 | US-13 | `include_text=true` | `clean_text` present |
+| TC-37 | US-13 | `job=` filter | Only matching rows |
+| TC-38 | US-13 | `page_size=` param | Page size honored, `next` populated |
+| TC-39 | US-14 | GET /api/urls/{id}/ with `include_html=false` | `raw_html`/`clean_text` still present (detail always includes both) |
+| TC-40 | US-07 | `chunk_text()` on text with no paragraph breaks | Splits on word boundaries (BeautifulSoup-fallback case) |
+| TC-41 | US-07 | `chunk_text()` on empty text | Returns `[]` |
+| TC-42 | US-07 | Real `Embedder` (slow) | 384-dim, L2-normalized vectors |
+| TC-43 | US-08 | Extractor: invalid items / duplicate names | Dropped / deduped |
+| TC-44 | US-08 | Extractor on a contentless page (`informationevolution_404.html` fixture) | Returns no people |
+| TC-45 | US-11 | Formatter: malformed top-level JSON shape | `llm_ok` false |
+| TC-46 | US-11 | Formatter: malformed person items in an otherwise valid response | Skipped, not fatal |
+| TC-47 | US-11 | Formatter `chunks` field | Always the full retrieved list, not just the LLM context slice |
+| TC-48 | US-12 | Formatter: empty/whitespace-only `answer` | Treated as invalid, `llm_ok` false |
+| TC-49 | US-12 | Formatter: explicit not-found `answer` | Accepted as valid, `llm_ok` true |
+| TC-50 | US-11 | Formatter: LLM includes a tangential person | Passed through unfiltered (no code-side relevance filtering) |
+| TC-51 | US-01 | Upload form: valid `.csv` | Form validates |
+| TC-52 | US-09 | `fetch_url`/`ingest_url`: stale `error` from a prior failure | Cleared to `""` on the next success |
+| TC-53 | US-09 | `ingest_url`: embedding/FAISS raises | Record marked `failed`; no partial vectors saved (Chunk/Person rows left for `rebuild_index`) |
+| TC-54 | US-02 | `parse_url_file()` on the real sample xlsx | 5 urls, 0 skipped |
+| TC-55 | US-10 | `retrieve()`: FAISS id with no matching Chunk row | Dropped silently (orphan handling) |
+| TC-56 | US-10 | `retrieve()`: no FAISS hits | Returns `[]` |
+| TC-57 | US-10 | Search page: query under 3 characters | Validation message shown |
+| TC-58 | US-10 | Search page: no query submitted yet | Blank results area, no error/empty-index message |
+| TC-59 | US-11 | Search page: `HX-Request` header | Returns the results fragment only, not the full page |
+| TC-60 | US-11 | Search page: successful search | Person card rendered with name/company |
+| TC-61 | US-08 | JSON-LD: nested `Organization.employee` Person array | Extracted with company inferred from the enclosing Organization (ADR-010) |
+| TC-62 | US-08 | JSON-LD: no `<script type="application/ld+json">` present | Returns `[]` |
+| TC-63 | US-08 | JSON-LD: malformed JSON in the script tag | Returns `[]`, never raises |
+| TC-64 | US-08 | JSON-LD: Person entries missing name/role | Dropped |
+| TC-65 | US-08 | JSON-LD on the real `theorg_perplexity.html` fixture | 16 real Perplexity leaders extracted (the ADR-010 motivating case) |
+| TC-66 | US-19 | Unhandled exception in an API view | 500 `{"detail": "Internal error."}`, real exception never leaked into the response |
+| TC-67 | US-19 | Unknown HTML page (`DEBUG=False`) | Friendly 404 page, no traceback |
+| TC-68 | US-19 | Server error (`DEBUG=False`) | Friendly 500 page, no traceback |
+| TC-69 | US-08 | `get_llm()` default provider | Returns `OllamaClient` |
+| TC-70 | US-08 | `get_llm()` with `LLM_PROVIDER=groq` | Returns `GroqClient` |
+| TC-71 | US-08 | `OllamaClient.complete_json()`: fenced ` ```json ` response | Fences stripped, parsed; INFO logged (US-19) |
+| TC-72 | US-19 | `OllamaClient.complete_json()`: connection refused | `LLMError` ("run \`ollama serve\`"); ERROR logged |
+| TC-73 | US-08 | `OllamaClient.complete_json()`: unparseable content | `LLMError` |
+
+`test_home_page_returns_200` (the Phase 0 smoke test) is intentionally not assigned a TC id: it's an
+infrastructure sanity check, not a story-specific test case, per principle 4 above (every TC maps to
+a US-xx). TC-61 to TC-65 are mapped to US-08 as the closest existing story; the JSON-LD extraction
+path itself is a design addition documented in `DECISIONS.md` ADR-010, not a separate backlog story.
 
 ## 5. Manual end-to-end checklist
 - [ ] Fresh clone, follow README exactly

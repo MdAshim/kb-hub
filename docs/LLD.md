@@ -8,13 +8,14 @@ harvest/
   parsers.py     parse_url_file()
   fetcher.py     fetch(), FetchResult
   tasks.py       fetch_url()
-  views.py       upload_view, job_detail_view, job_rows_partial
+  views.py       upload_view, job_detail_view, job_rows_partial, job_list_view, _records()
 knowledge/
   models.py      Person, Chunk
   chunker.py     chunk_text()
   embedder.py    Embedder
   vector_store.py VectorStore
   extractor.py   extract_people(), PersonData
+  structured_data.py extract_json_ld_people() (schema.org Person via JSON-LD, ADR-010)
   tasks.py       ingest_url()
   management/commands/rebuild_index.py
 search/
@@ -26,6 +27,7 @@ api/
   serializers.py UrlRecordSerializer, HarvestJobSerializer, SearchRequestSerializer
   views.py       UrlRecordViewSet, HarvestJobView, SearchAPIView
   urls.py
+  exceptions.py  exception_handler() -- unhandled exceptions -> {"detail": "Internal error."}
 ```
 
 ## 2. Class diagram
@@ -151,17 +153,27 @@ If none, return {"people":[]}.*
 @huey.task()
 def ingest_url(record_id: int) -> None:
     """1. Delete old Chunks/Persons for the record and remove their vectors.
-    2. chunk_text -> Chunk(kind='text').
-    3. extract_people -> Person + Chunk(kind='person', text='Name, Role, Company. Bio').
-    4. Embed all new chunks, VectorStore.add(chunk ids), save.
-    5. Set record status 'indexed'. On extractor failure, keep text chunks and log."""
+    2. extract_json_ld_people(raw_html) -- cheap, deterministic, no LLM call (ADR-010).
+    3. chunk_text -> Chunk(kind='text').
+    4. extract_people(clean_text) -- the LLM path. Merge with the JSON-LD people,
+       deduped by lowercased name; the JSON-LD version wins on a collision.
+    5. Person + Chunk(kind='person', text='Name, Role, Company. Bio') for the merged list.
+    6. Embed all new chunks, VectorStore.add(chunk ids), save.
+    7. Set record status 'indexed'. On extractor failure, keep text chunks and log."""
 ```
 
 ### search/retriever.py
 ```python
-def retrieve(query: str, k: int = SEARCH_TOP_K) -> list[RetrievedChunk]:
-    """Embed query, FAISS search k, load Chunks (select_related url, person),
-    score += PERSON_BOOST for kind='person', sort desc, return."""
+def retrieve(query: str, k: int | None = None) -> list[RetrievedChunk]:
+    """k defaults to settings.SEARCH_TOP_K, resolved inside the function body
+    rather than as a literal default (avoids evaluating settings at import time).
+    Embed query, FAISS search k, load Chunks (select_related url, person),
+    score += PERSON_BOOST for kind='person', sort desc, return.
+
+    IndexFlatIP.search() always returns up to k results with no relevance
+    floor -- it happily returns the closest available vectors even when
+    nothing in the index is truly relevant. Deciding "not found" is
+    format_results()'s job, not retrieve()'s."""
 ```
 
 ### search/formatter.py
@@ -169,7 +181,14 @@ def retrieve(query: str, k: int = SEARCH_TOP_K) -> list[RetrievedChunk]:
 def format_results(query: str, chunks: list[RetrievedChunk]) -> SearchResult:
     """Build numbered context from top SEARCH_CONTEXT_CHUNKS, each with its source URL.
     Ask LLM for {"answer": str, "people": [{name, role, company, summary, source_url}]}.
-    Validate; on any failure return SearchResult(llm_ok=False, chunks=chunks)."""
+    The prompt requires "answer" to always be a non-empty sentence (a direct answer or
+    an explicit not-found statement) and "people" to include only entries directly
+    relevant to the question, not everyone mentioned in the context -- format_results()
+    does not filter people in code, it passes through whatever the LLM returns.
+    Validate; an empty/whitespace-only "answer" is treated as invalid too, regardless
+    of what the model returned. On any failure return SearchResult(llm_ok=False,
+    chunks=chunks). SearchResult.chunks is always the full input chunks list, not just
+    the context slice sent to the LLM -- true on both the success and failure paths."""
 ```
 
 ### search/llm.py
@@ -198,7 +217,11 @@ class GroqClient(LLMClient):
 ## 5. Configuration
 All tunables come from settings, loaded from `.env` (see `.env.example`):
 embedding model and dimension, chunk size and overlap, top-k, context size, person boost,
-LLM provider and model, fetch timeouts, retries, fallback flag, min text length.
+LLM provider and model, fetch timeouts, retries, fallback flag, min text length,
+`HUEY_WORKERS` (consumer thread count, default 1 so FAISS writes stay serialized).
+
+Logging and API error handling are configured directly in `config/settings.py`
+(`LOGGING`, and `REST_FRAMEWORK["EXCEPTION_HANDLER"]`), not via `.env` -- see §6.
 
 ## 6. Error handling
 | Where | Failure | Behaviour |
@@ -209,3 +232,5 @@ LLM provider and model, fetch timeouts, retries, fallback flag, min text length.
 | Ingest | Embedding/FAISS error | Record `failed`; no partial vectors saved |
 | Search | LLM fails / bad JSON | Show raw chunks with notice |
 | Search | Empty index | "Nothing indexed yet" message |
+| HTML views | Unknown URL / unhandled view exception | `templates/404.html` / `templates/500.html` (friendly page, no traceback; only rendered when `DEBUG=False`) |
+| API | Unhandled exception in an api/ view | `api/exceptions.py`'s custom DRF exception handler returns `500 {"detail": "Internal error."}`; the real exception is logged server-side via `logger.exception()`, never in the response body |

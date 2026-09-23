@@ -10,8 +10,11 @@ structured person cards (name, role, company, bio, source). A REST API exposes t
 ## Features
 - **Upload & harvest**: CSV or XLSX upload, background scraping with a Playwright fallback for
   JS-heavy or bot-protected pages, raw HTML and HTTP status stored in SQLite.
-- **Knowledge base pipeline**: automatic chunking, LLM-based person extraction, embeddings with
-  `bge-small-en-v1.5`, stored in a persistent FAISS index.
+- **Knowledge base pipeline**: automatic chunking, person extraction via the LLM plus an
+  opportunistic schema.org JSON-LD path (no LLM call needed when a page embeds structured
+  `Person` data — why sites like theorg.com/Perplexity extract reliably even where prose
+  extraction alone wouldn't catch it), embeddings with `bge-small-en-v1.5`, stored in a
+  persistent FAISS index.
 - **Semantic search UI**: natural-language queries, person-aware retrieval, LLM-formatted result
   cards, with the retrieved source chunks and scores visible.
 - **REST API**: `GET /api/urls/` (URL, status code, raw HTML), plus detail, job and search endpoints.

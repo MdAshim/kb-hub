@@ -40,6 +40,7 @@ def test_job_detail_returns_counts_per_status(client):
 
 @pytest.mark.django_db
 def test_job_detail_returns_404_for_unknown_id(client):
+    # TC-32
     response = client.get(reverse("api:job-detail", args=[999]))
 
     assert response.status_code == 404

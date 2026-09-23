@@ -31,6 +31,7 @@ def test_chunk_text_respects_size_and_overlap_with_title_prefix():
 
 
 def test_chunk_text_splits_a_single_unbroken_paragraph():
+    # TC-40
     # The BeautifulSoup-fallback extraction path (get_text(" ", strip=True))
     # produces text with no paragraph breaks at all -- one giant "paragraph"
     # that must still be split on word boundaries instead of forming one
@@ -46,5 +47,6 @@ def test_chunk_text_splits_a_single_unbroken_paragraph():
 
 
 def test_chunk_text_empty_input_returns_no_chunks():
+    # TC-41
     assert chunk_text("", TITLE, size=50, overlap=10) == []
     assert chunk_text("   ", TITLE, size=50, overlap=10) == []

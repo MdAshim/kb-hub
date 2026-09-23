@@ -53,7 +53,7 @@ OLLAMA_MODEL=llama3.2:3b
 ## 5. Pre-download the embedding model
 Inside the project virtual environment:
 ```bash
-python -c "from sentence_transformers import SentenceTransformer; m = SentenceTransformer('BAAI/bge-small-en-v1.5'); print(m.get_sentence_embedding_dimension())"
+python -c "from sentence_transformers import SentenceTransformer; m = SentenceTransformer('BAAI/bge-small-en-v1.5'); print(m.get_embedding_dimension())"
 ```
 Expected output: `384` (must match `EMBEDDING_DIM`). About 130 MB, cached after the first run.
 

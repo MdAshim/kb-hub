@@ -52,6 +52,8 @@ As a user, I want people identified as structured records, not only raw text.
 - The LLM extracts `[{name, role, company, bio}]` from each page's text.
 - Each person is saved as a Person row and a `kind="person"` chunk is created and embedded.
 - Invalid LLM output is logged and the page still gets its text chunks.
+- Where a page embeds schema.org `Person` data as JSON-LD, that's extracted too (no LLM call
+  needed for those entries) and merged with the LLM's results, deduped by name (ADR-010).
 
 ### US-09 Persistent, rebuildable index (S)
 As a developer, I want the index to survive restarts and be rebuildable.

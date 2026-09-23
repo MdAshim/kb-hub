@@ -55,7 +55,7 @@ flowchart TB
 |---|---|
 | Upload UI | Accept file, validate, create job, enqueue fetch tasks |
 | Fetcher | Download page, fallback to Playwright, extract clean text |
-| Ingest pipeline | Chunk text, extract people via LLM, embed, write to FAISS |
+| Ingest pipeline | Chunk text; extract people via the LLM and, opportunistically, via schema.org JSON-LD (ADR-010) when a page embeds it; embed, write to FAISS |
 | SQLite | Source of truth: raw HTML, status, people, chunk text |
 | FAISS | Vectors only, keyed by `Chunk.id` |
 | Retriever | Embed query, search FAISS, resolve chunks, boost person chunks |
