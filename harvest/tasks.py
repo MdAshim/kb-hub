@@ -3,19 +3,16 @@
 from django.utils import timezone
 from huey.contrib.djhuey import task
 
+from knowledge.tasks import ingest_url
+
 from .fetcher import fetch
-from .models import HarvestJob, UrlRecord
+from .models import HarvestJob, UrlRecord, update_job_status
 
 
 @task(retries=0)
 def fetch_url(record_id: int) -> None:
     """Load UrlRecord, call fetch(), save fields, set status fetched|failed,
-    update job counters.
-
-    Phase 1 scope: does not enqueue ingest_url (knowledge app doesn't exist
-    yet) and treats fetched/failed as the job's terminal states. Phase 2 must
-    change this to enqueue ingest_url on success and wait for indexed/failed.
-    """
+    enqueue ingest_url on success, update job status."""
     try:
         record = UrlRecord.objects.select_related("job").get(id=record_id)
     except UrlRecord.DoesNotExist:
@@ -44,14 +41,7 @@ def fetch_url(record_id: int) -> None:
     record.fetched_at = timezone.now()
     record.save()
 
-    _update_job_status(job)
+    if record.status == UrlRecord.STATUS_FETCHED:
+        ingest_url(record.id)
 
-
-def _update_job_status(job: HarvestJob) -> None:
-    unfinished = job.url_records.filter(
-        status__in=[UrlRecord.STATUS_PENDING, UrlRecord.STATUS_FETCHING]
-    ).exists()
-    if not unfinished and job.status != HarvestJob.STATUS_DONE:
-        job.status = HarvestJob.STATUS_DONE
-        job.finished_at = timezone.now()
-        job.save(update_fields=["status", "finished_at"])
+    update_job_status(job)

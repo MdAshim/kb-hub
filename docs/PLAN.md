@@ -21,16 +21,16 @@ Story IDs refer to `BACKLOG.md`.
 - [x] Run against `samples/Leadership_URL.xlsx`; save fetched HTML as test fixtures
 
 ## Phase 2: Knowledge base pipeline (E2)
-- [ ] `Person`, `Chunk` models + migrations [US-07, US-08]
-- [ ] `chunker.chunk_text()` with overlap and title prefix [US-07]
-- [ ] `embedder.Embedder` (singleton, batch, normalized) [US-07]
-- [ ] `vector_store.VectorStore`: load/save, add, remove, search, lock [US-07, US-09]
-- [ ] Install Ollama and pull `OLLAMA_MODEL` (see `LOCAL_SETUP.md`); pre-download embedding model
-- [ ] `search/llm.py`: `OllamaClient` (default, /api/chat, format=json, 60 s timeout) and optional `GroqClient` [US-08]
-- [ ] `extractor.extract_people()` with defensive JSON parsing [US-08]
-- [ ] Huey task `ingest_url(record_id)`, chained after a successful fetch [US-07]
-- [ ] Re-ingest removes old chunks and vectors [US-09]
-- [ ] `rebuild_index` management command [US-09]
+- [x] `Person`, `Chunk` models + migrations [US-07, US-08]
+- [x] `chunker.chunk_text()` with overlap and title prefix [US-07]
+- [x] `embedder.Embedder` (singleton, batch, normalized) [US-07]
+- [x] `vector_store.VectorStore`: load/save, add, remove, search, lock [US-07, US-09]
+- [x] Install Ollama and pull `OLLAMA_MODEL` (see `LOCAL_SETUP.md`); pre-download embedding model
+- [x] `search/llm.py`: `OllamaClient` (default, /api/chat, format=json, 60 s timeout) and optional `GroqClient` [US-08]
+- [x] `extractor.extract_people()` with defensive JSON parsing [US-08]
+- [x] Huey task `ingest_url(record_id)`, chained after a successful fetch [US-07]
+- [x] Re-ingest removes old chunks and vectors [US-09]
+- [x] `rebuild_index` management command [US-09]
 
 ## Phase 3: Search (E3)
 - [ ] `retriever.retrieve()` with person boost [US-10]

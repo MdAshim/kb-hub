@@ -3,6 +3,7 @@ Django settings for config project.
 """
 
 import os
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -205,6 +206,14 @@ HUEY = {
         "worker_type": "thread",
     },
 }
+
+# Under pytest, tasks are enqueued (never run, since immediate stays False)
+# but must never land in the real dev queue file -- Django's test-DB
+# rollback doesn't cover Huey's separate SQLite store, so without this a
+# stray enqueued task from a test run would sit in data/huey.db and could
+# later be picked up by a real `run_huey` consumer.
+if "pytest" in sys.modules:
+    HUEY["filename"] = str(DATA_DIR / "huey-test.db")
 
 
 # ---------------------------------------------------------------------------

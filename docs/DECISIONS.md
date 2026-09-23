@@ -57,3 +57,7 @@ Format: context, decision, consequences.
 - **Context:** Vector indexes can be lost or need re-embedding.
 - **Decision:** All text lives in SQLite; FAISS stores vectors keyed by `Chunk.id` only.
 - **Consequences:** The index can always be rebuilt with one command.
+- **Note:** If `ingest_url` fails during embedding/FAISS write, the `Chunk`/`Person` rows it
+  already created are left in SQLite (the record is marked `failed`, no partial vectors are
+  saved). This is intentional, not a bug: since SQLite is the source of truth, those rows are
+  picked up and indexed by a later `python manage.py rebuild_index`, or by re-harvesting the URL.

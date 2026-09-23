@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class HarvestJob(models.Model):
@@ -62,3 +63,19 @@ class UrlRecord(models.Model):
 
     def __str__(self) -> str:
         return f"{self.url} ({self.status})"
+
+
+def update_job_status(job: HarvestJob) -> None:
+    """Mark a job done once every one of its records has reached a terminal
+    state (indexed or failed). Called from harvest.tasks.fetch_url (for
+    records that fail before ingest) and knowledge.tasks.ingest_url (for
+    records that reach indexed/failed). Lives here, not in harvest.tasks, so
+    knowledge.tasks can import it without a harvest.tasks <-> knowledge.tasks
+    circular import (fetch_url calls ingest_url directly)."""
+    unfinished = job.url_records.filter(
+        status__in=[UrlRecord.STATUS_PENDING, UrlRecord.STATUS_FETCHING, UrlRecord.STATUS_FETCHED]
+    ).exists()
+    if not unfinished and job.status != HarvestJob.STATUS_DONE:
+        job.status = HarvestJob.STATUS_DONE
+        job.finished_at = timezone.now()
+        job.save(update_fields=["status", "finished_at"])

@@ -34,6 +34,10 @@ def test_fetch_url_saves_fetched_fields(monkeypatch):
             method="requests",
         ),
     )
+    # ingest_url is knowledge's concern (see tests/test_knowledge_tasks.py);
+    # stub it here so this stays a fetch-only test.
+    ingest_calls = []
+    monkeypatch.setattr(tasks, "ingest_url", lambda record_id: ingest_calls.append(record_id))
 
     tasks.fetch_url.call_local(record.id)
 
@@ -44,10 +48,12 @@ def test_fetch_url_saves_fetched_fields(monkeypatch):
     assert record.clean_text == "hi"
     assert record.fetch_method == "requests"
     assert record.fetched_at is not None
+    assert ingest_calls == [record.id]
 
+    # fetched is no longer terminal as of Phase 2 -- the job isn't done until
+    # ingest_url moves the record to indexed/failed.
     job.refresh_from_db()
-    assert job.status == HarvestJob.STATUS_DONE
-    assert job.finished_at is not None
+    assert job.status == HarvestJob.STATUS_RUNNING
 
 
 @pytest.mark.django_db

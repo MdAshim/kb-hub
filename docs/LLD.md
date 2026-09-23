@@ -140,6 +140,8 @@ def extract_people(text: str, company_hint: str) -> list[PersonData]:
     """Send up to ~12k chars per call (split long pages, merge by name).
     Validate each item has name and role; drop invalid ones; dedupe by lowercased name."""
 ```
+`company_hint` is `UrlRecord.title`, falling back to the URL's domain (`urlparse(url).netloc`)
+when there's no title, so extraction still has some company context on titleless pages.
 Prompt (system): *Extract every person described on this page. Return JSON only:
 {"people":[{"name":"","role":"","company":"","bio":""}]}. Use only the text given.
 If none, return {"people":[]}.*
